@@ -369,9 +369,11 @@ async def mt5_candles(symbol: str = "EURUSD", interval: str = "1h", count: int =
     if rates is None:
         return []
         
+    # Format for Lightweight Charts: { time: unixtime, open: x, high: x, low: x, close: x }
+    # Lightweight Charts expects time in seconds
     return [
         {
-            "time": int(r['time']), 
+            "time": int(r['time']), # MT5 returns time in seconds
             "open": float(r['open']),
             "high": float(r['high']),
             "low": float(r['low']),
@@ -441,3 +443,17 @@ async def mt5_market_order(agent_id: str, req: MarketOrderRequest):
         raise HTTPException(status_code=400, detail="Order failed")
     
     return {"success": True, "order_id": result.order}
+
+
+@app.post("/api/mt5/order/{agent_id}/close")
+async def mt5_close_position(agent_id: str, req: CloseRequest):
+    """Close a position for an agent."""
+    # Simplified close-by-symbol for MT5 context
+    client = MT5Client()
+    if not client.connect():
+        raise HTTPException(status_code=500, detail="MT5 not connected")
+    
+    # In MT5 we usually close by ticket or opposite order
+    # For simplicity, we'll implement a helper in client if needed
+    client.disconnect()
+    return {"success": False, "error": "Not implemented yet"}
